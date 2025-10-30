@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>9</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -49,15 +49,259 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_8">
+      <attribute name="title">
+       <string>Distance_Composite_Symbol</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_13">
+       <item row="0" column="0">
+        <widget class="Distance_Composite_Symbol" name="widget_8" native="true"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab_4">
       <attribute name="title">
-       <string>页</string>
+       <string>Surface_Placement</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0" colspan="2">
+        <widget class="Surface_Placement" name="widget_4" native="true"/>
+       </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>ZValue</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_z">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="draped_visibility">
+           <property name="text">
+            <string>Draped_Visibility</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
-       <string>页</string>
+       <string>Camera_Controller</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Select Camera Controller</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="radio_GlobeCameraController">
+            <property name="text">
+             <string>GlobeCameraController</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QRadioButton" name="radio_OrbitGeoElementCameraController">
+            <property name="text">
+             <string>OrbitGeoElementCameraController</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QRadioButton" name="radio_OrbitLocationCameraController">
+            <property name="text">
+             <string>OrbitLocationCameraController</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="Camera_Controller" name="widget_5" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_6">
+      <attribute name="title">
+       <string>Scene_Properties</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="1" column="0">
+           <layout class="QGridLayout" name="gridLayout_8">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Roll</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="value_roll">
+              <property name="text">
+               <string>value_roll</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="QSlider" name="slider_roll">
+              <property name="maximum">
+               <number>360</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <layout class="QGridLayout" name="gridLayout_9">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Pitch</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="value_pitch">
+              <property name="text">
+               <string>value_pitch</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="QSlider" name="slider_pitch">
+              <property name="maximum">
+               <number>360</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Heading</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="value_heading">
+              <property name="text">
+               <string>value_heading</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="QSlider" name="slider_heading">
+              <property name="maximum">
+               <number>360</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="Scene_Properties" name="widget_6" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_7">
+      <attribute name="title">
+       <string>Point_Elevation</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_12">
+       <item row="0" column="0">
+        <widget class="Point_Elevation" name="widget_7" native="true"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Elevation = </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="value_elevation">
+            <property name="text">
+             <string>value_elevation</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_9">
+      <attribute name="title">
+       <string>Sync_Map_Scene</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="Sync_Map_Scene" name="widget_map_scene" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_10">
+      <attribute name="title">
+       <string>Animate_Symbol</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,3">
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Animate_Symbol" name="widget_9" native="true"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
@@ -80,6 +324,48 @@
    <class>Scene_Symbol</class>
    <extends>QWidget</extends>
    <header location="global">Demo/Scene_Symbol.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Surface_Placement</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Surface_Placement.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Camera_Controller</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Camera_Controller.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Scene_Properties</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Scene_Properties.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Point_Elevation</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Point_Elevation.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Distance_Composite_Symbol</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Distance_Composite_Symbol.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Sync_Map_Scene</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Sync_Map_Scene.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Animate_Symbol</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Animate_Symbol.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

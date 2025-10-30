@@ -26,9 +26,6 @@
 
 using namespace Esri::ArcGISRuntime;
 
-// #define Local_File_Tile
-#define Local_File_Raster
-
 static QString defaultDataPath()
 {
     QString dataPath;

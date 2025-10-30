@@ -41,9 +41,17 @@ find_package(ArcGISRuntime 200.8.0 COMPONENTS REQUIRED Cpp)
 
 set(SOURCE_FILES
   main.cpp
+  Utils/Signal_Proxy.cpp
   Demo/Terrain_Surface.cpp
   Demo/Mobile_Scene_Package.cpp
   Demo/Scene_Symbol.cpp
+  Demo/Surface_Placement.cpp
+  Demo/Camera_Controller.cpp
+  Demo/Scene_Properties.cpp
+  Demo/Point_Elevation.cpp
+  Demo/Distance_Composite_Symbol.cpp
+  Demo/Sync_Map_Scene.cpp
+  Demo/Animate_Symbol.cpp
 
 )
 
