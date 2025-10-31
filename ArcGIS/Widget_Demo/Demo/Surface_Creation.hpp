@@ -1,5 +1,4 @@
 #pragma once
-
 namespace Esri::ArcGISRuntime {
 class SceneGraphicsView;
 } // namespace Esri::ArcGISRuntime
@@ -8,7 +7,7 @@ class SceneGraphicsView;
 #include <SceneGraphicsView.h>
 
 
-class Imagery_Surface : public QWidget
+class Surface_Creation : public QWidget
 {
     Q_OBJECT
 public slots:
@@ -17,8 +16,8 @@ private:
     Esri::ArcGISRuntime::Scene* m_scene = nullptr;
     Esri::ArcGISRuntime::SceneGraphicsView* m_sceneView = nullptr;
 public:
-    explicit Imagery_Surface(QWidget* parent = nullptr);
-    ~Imagery_Surface() override;
+    explicit Surface_Creation(QWidget* parent = nullptr);
+    ~Surface_Creation(){} ;
 
 
 

@@ -52,6 +52,8 @@ set(SOURCE_FILES
   Demo/Distance_Composite_Symbol.cpp
   Demo/Sync_Map_Scene.cpp
   Demo/Animate_Symbol.cpp
+  Demo/Surface_Creation.cpp
+  Demo/Widget_Basic.cpp
 
 )
 

@@ -17,8 +17,28 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>9</number>
+      <number>0</number>
      </property>
+     <widget class="QWidget" name="tab_12">
+      <attribute name="title">
+       <string>Widget_Basic</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_15">
+       <item row="0" column="0">
+        <widget class="Widget_Basic" name="widget_11" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_11">
+      <attribute name="title">
+       <string>Surface_Creation</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_14">
+       <item row="0" column="0">
+        <widget class="Surface_Creation" name="widget_10" native="true"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>Terrain Surface</string>
@@ -366,6 +386,18 @@
    <class>Animate_Symbol</class>
    <extends>QWidget</extends>
    <header location="global">Demo/Animate_Symbol.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Surface_Creation</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Surface_Creation.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Widget_Basic</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Widget_Basic.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

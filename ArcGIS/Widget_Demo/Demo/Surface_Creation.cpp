@@ -11,7 +11,7 @@
 //
 
 // Other headers
-#include "Terrain_Surface_Creation.hpp"
+#include "Surface_Creation.hpp"
 
 // C++ API headers
 #include "ArcGISTiledElevationSource.h"
@@ -48,7 +48,7 @@ static QString defaultDataPath()
     return dataPath;
 }
 
-Terrain_Surface_Creation::Terrain_Surface_Creation(QWidget* parent /*=nullptr*/)
+Surface_Creation::Surface_Creation(QWidget* parent /*=nullptr*/)
     : QWidget(parent)
 {
     // Create a scene using the ArcGISTerrain BasemapStyle
@@ -57,10 +57,13 @@ Terrain_Surface_Creation::Terrain_Surface_Creation(QWidget* parent /*=nullptr*/)
     // Create a scene view, and pass in the scene
     m_sceneView = new SceneGraphicsView(m_scene, this);
 
+
 #ifdef Local_File_Tile
+    /// ============================================================================================================
+    /// 		此处离线文件只是一个平面surface，如果要3D高程显示，需要在该surface之下添加一层高程surface
+    /// ============================================================================================================
     // create the MontereyElevation data path
-    // data is downloaded automatically by the sample viewer app. Instructions to download
-    // separately are specified in the readme.
+    // data is downloaded automatically by the sample viewer app. Instructions to download separately are specified in the readme.
     const QString montereyTileElevationPath = QString{defaultDataPath() + "/ArcGIS/Runtime/Data/tpkx/MontereyElevation.tpkx"};
 
     // Before attempting to add any layers, check that the file for the elevation source exists at all.
@@ -159,4 +162,3 @@ Terrain_Surface_Creation::Terrain_Surface_Creation(QWidget* parent /*=nullptr*/)
     setLayout(vBoxLayout);
 }
 
-Terrain_Surface_Creation::~Terrain_Surface_Creation() = default;
