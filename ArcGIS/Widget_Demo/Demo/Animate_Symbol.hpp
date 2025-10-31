@@ -136,9 +136,13 @@ private:
     std::unique_ptr<MissionData> m_missionData;
     int m_frame = 0;
     double m_mapZoomFactor = 5.0;
+    double m_animationSpeed = 100.0; // 默认速度（0–100%）
+    QTimer* timer{};
 public:
     explicit Animate_Symbol(QWidget* parent = nullptr);
 
+private:
+    void _Signal_Bind();
 private:
     int missionFrame() const{return m_frame;}
     bool missionReady() const
@@ -166,6 +170,42 @@ private:
 
         return (int)m_missionData->size();
     }
+    void setFollowing(bool following)
+    {
+        if (following)
+            m_sceneView->setCameraController(m_followingController);
+        else
+            m_sceneView->setCameraController(m_globeController);
+    }
+
+    void animate();
+
+    void setAnimationSpeed(double value)
+    {
+        m_animationSpeed = std::clamp(value, 0.0, 100.0);
+        updateTimerInterval();
+    }
+    void updateTimerInterval();
+
+    void setZoom(double zoomDist)
+    {
+        if (m_followingController)
+        {
+            m_followingController->setCameraDistance(zoomDist);
+            // emit zoomChanged();
+        }
+    }
+
+    void setAngle(double angle)
+    {
+        if (m_followingController)
+        {
+            m_followingController->setCameraPitchOffset(angle);
+            // emit angleChanged();
+        }
+    }
+
+
 public:
     void createRoute2d(Esri::ArcGISRuntime::GraphicsOverlay* mapOverlay);
 

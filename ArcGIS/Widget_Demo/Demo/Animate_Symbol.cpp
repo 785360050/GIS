@@ -43,6 +43,9 @@
 #include <QFuture>
 #include <QVBoxLayout>
 #include <QStringListModel>
+#include <QTimer>
+
+#include "../Utils/Signal_Proxy.hpp"
 
 using namespace Esri::ArcGISRuntime;
 
@@ -64,12 +67,62 @@ static const QString ROLL = QStringLiteral("roll");
 static const QString PITCH = QStringLiteral("pitch");
 static const QString ANGLE = QStringLiteral("angle");
 
+
+
+void Animate_Symbol::updateTimerInterval()
+{
+    // 对应 QML 的 interval 计算公式
+    double interval = 16.0 + 84.0 * (100.0 - m_animationSpeed) / 100.0;
+    qDebug()<<"interval = "<<interval;
+    timer->setInterval(static_cast<int>(interval));
+}
+
+void Animate_Symbol::_Signal_Bind()
+{
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Mission_Selected,this,&Animate_Symbol::changeMission);
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Camera_Follow,this,&Animate_Symbol::setFollowing);
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Set_Zoom,this,&Animate_Symbol::setZoom);
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Set_Angle,this,&Animate_Symbol::setAngle);
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Set_Speed,this,&Animate_Symbol::setAnimationSpeed);
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Set_Frame,this,&Animate_Symbol::setMissionFrame);
+
+
+
+
+
+    // === 等价于 QML Timer { ... } ===
+    timer = new QTimer(this);
+    timer->setTimerType(Qt::PreciseTimer);
+    timer->setSingleShot(false);   // repeat: true
+
+    // 定时器触发逻辑（对应 onTriggered: animate()）
+    connect(timer, &QTimer::timeout, this, [&]()
+    {
+        animate();
+
+        setMissionFrame(m_frame+1);
+        if(m_frame>=missionSize())
+            setMissionFrame(0);
+    });
+
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Play,this,[&](bool checked)
+    {
+        if (checked)
+            timer->start();
+        else
+            timer->stop();
+    });
+}
+
+
 Animate_Symbol::Animate_Symbol(QWidget* parent /*=nullptr*/)
     : QWidget(parent)
     , m_dataPath(defaultDataPath() + "/ArcGIS/Runtime/Data/3D")
     , m_missionsModel(new QStringListModel({QStringLiteral("Grand Canyon"), QStringLiteral("Hawaii"), QStringLiteral("Pyrenees"), QStringLiteral("Snowdon")},this))
     , m_missionData(new MissionData)
 {
+    _Signal_Bind();
+
     // Create a scene using the ArcGISTerrain BasemapStyle
     m_scene = new Scene(BasemapStyle::ArcGISTerrain, this);
 
@@ -121,8 +174,6 @@ Animate_Symbol::Animate_Symbol(QWidget* parent /*=nullptr*/)
     setLayout(vBoxLayout);
 
 
-    /// Init Status
-    changeMission("Grand Canyon");
 }
 
 void Animate_Symbol::changeMission(const QString &missionNameStr)
@@ -153,7 +204,36 @@ void Animate_Symbol::changeMission(const QString &missionNameStr)
 
     // emit missionReadyChanged();
     // emit missionSizeChanged();
+    Signal_Proxy::Instance().Animate_UI_Update_Frame_Size(missionSize());
 }
+
+void Animate_Symbol::animate()
+{
+    if (!m_missionData)
+        return;
+
+    if (missionFrame() < missionSize())
+    {
+        // get the data for this stage in the mission
+        const MissionData::DataPoint& dp = m_missionData->dataAt(missionFrame());
+
+        // move 3D graphic to the new position
+        m_graphic3d->setGeometry(dp.m_pos);
+        // update attribute expressions to immediately update rotation
+        m_graphic3d->attributes()->replaceAttribute(HEADING, dp.m_heading);
+        m_graphic3d->attributes()->replaceAttribute(PITCH, dp.m_pitch);
+        m_graphic3d->attributes()->replaceAttribute(ROLL, dp.m_roll);
+
+        // move 2D graphic to the new position
+        m_graphic2d->setGeometry(dp.m_pos);
+        m_symbol2d->setAngle(dp.m_heading);
+    }
+
+    // increment the frame count
+    // emit nextFrameRequested();
+}
+
+
 
 void Animate_Symbol::createRoute2d(GraphicsOverlay *mapOverlay)
 {

@@ -35,4 +35,13 @@ signals:
     void Scene_Properties_Set_Heading(double value);
 
     void Point_Elevation_Show(double value);
+
+    void Animate_Mission_Selected(const QString mission_name);
+    void Animate_Camera_Follow(bool is_follow);
+    void Animate_Play(bool is_playing);
+    void Animate_Set_Zoom(double value);
+    void Animate_Set_Speed(double value);
+    void Animate_Set_Angle(double value);
+    void Animate_Set_Frame(double value);
+    void Animate_UI_Update_Frame_Size(int size);
 };
