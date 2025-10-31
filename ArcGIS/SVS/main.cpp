@@ -20,8 +20,6 @@
 
 #include "ArcGIS_Window.hpp"
 
-#include "Experiment/SVS.hpp"
-
 using namespace Esri::ArcGISRuntime;
 
 int main(int argc, char *argv[])
@@ -85,9 +83,6 @@ int main(int argc, char *argv[])
 
     ArcGIS_Window arcgis_window;
     arcgis_window.show();
-
-    // SVS svs;
-    // svs.showMaximized();
 
     return application.exec();
 }

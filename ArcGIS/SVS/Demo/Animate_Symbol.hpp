@@ -24,14 +24,14 @@ class SceneGraphicsView;
 #include <QFile>
 #include <QAbstractListModel>
 
-class MissionData
+class Mission_Data
 {
 public:
 
-    struct DataPoint
+    struct Point
     {
-        DataPoint(){}
-        DataPoint(double lon, double lat, double elevation, double heading, double pitch, double roll):
+        Point(){}
+        Point(double lon, double lat, double elevation, double heading, double pitch, double roll):
             m_pos(Esri::ArcGISRuntime::Point(lon, lat, elevation, Esri::ArcGISRuntime::SpatialReference::wgs84())),
             m_heading(heading),
             m_pitch(pitch),
@@ -42,15 +42,18 @@ public:
         double m_pitch = NAN;
         double m_roll = NAN;
     };
+private:
+    std::vector<Point> point;
+    bool m_ready{false};
 
-    typedef std::vector<DataPoint> DataPointList;
+public:
+    Mission_Data()=default;
+    ~Mission_Data()=default;
 
-    MissionData()=default;
-    ~MissionData()=default;
-
+public:
     bool parse(const QString& dataPath)
     {
-        m_data.clear();
+        point.clear();
         m_ready = false;
 
         QFile file(dataPath);
@@ -92,27 +95,25 @@ public:
             if(!ok)
                 continue;
 
-            m_data.emplace_back((double)lon, (double)lat, (double)elevation, (double)heading, (double)pitch, (double)roll);
+            point.emplace_back((double)lon, (double)lat, (double)elevation, (double)heading, (double)pitch, (double)roll);
         }
 
-        m_ready = m_data.size() > 0;
+        m_ready = point.size() > 0;
         return m_ready;
     }
-    bool isEmpty() const {return m_data.empty();}
-    size_t size() const {return m_data.size();}
-    const DataPoint& dataAt(size_t i) const
+    bool isEmpty() const {return point.empty();}
+    size_t size() const {return point.size();}
+    const Point& operator[](size_t index) const
     {
-        if(i < m_data.size())
-            return m_data[i];
+        if(index < point.size())
+            return point[index];
 
-        static MissionData::DataPoint dataPoint;
+        static Mission_Data::Point dataPoint;
         return dataPoint;
     }
     bool ready() const {return m_ready;}
 
-private:
-    DataPointList m_data;
-    bool m_ready{false};
+
 };
 
 class Animate_Symbol : public QWidget
@@ -121,85 +122,78 @@ class Animate_Symbol : public QWidget
 public slots:
 
 private:
-    Esri::ArcGISRuntime::Scene* m_scene = nullptr;
-    Esri::ArcGISRuntime::SceneGraphicsView* m_sceneView = nullptr;
-    Esri::ArcGISRuntime::MapGraphicsView* m_mapView = nullptr;
-    Esri::ArcGISRuntime::ModelSceneSymbol* m_model3d = nullptr;
-    Esri::ArcGISRuntime::Graphic* m_graphic3d = nullptr;
-    Esri::ArcGISRuntime::Graphic* m_graphic2d = nullptr;
-    Esri::ArcGISRuntime::SimpleMarkerSymbol* m_symbol2d = nullptr;
-    Esri::ArcGISRuntime::Graphic* m_routeGraphic = nullptr;
-    Esri::ArcGISRuntime::GlobeCameraController* m_globeController = nullptr;
-    Esri::ArcGISRuntime::OrbitGeoElementCameraController* m_followingController = nullptr;
-    QString m_dataPath;
-    QAbstractListModel* m_missionsModel = nullptr;
-    std::unique_ptr<MissionData> m_missionData;
-    int m_frame = 0;
-    double m_animationSpeed = 100.0; // 默认速度（0–100%）
+    Mission_Data mission_data;
+    int frame_index{};
+    double animation_speed{100.0}; // 默认速度（0–100%）
     QTimer* timer{};
+
+private:
+    Esri::ArcGISRuntime::Scene* scene = nullptr;
+    Esri::ArcGISRuntime::SceneGraphicsView* scene_view = nullptr;
+    Esri::ArcGISRuntime::MapGraphicsView* map_view = nullptr;
+    Esri::ArcGISRuntime::ModelSceneSymbol* model_3d = nullptr;
+    Esri::ArcGISRuntime::Graphic* graphic_3d = nullptr;
+    Esri::ArcGISRuntime::Graphic* graphic_2d = nullptr;
+    Esri::ArcGISRuntime::SimpleMarkerSymbol* symbol_2d = nullptr;
+    Esri::ArcGISRuntime::Graphic* graphic_route = nullptr;
+    Esri::ArcGISRuntime::GlobeCameraController* camera_controller_globe = nullptr;
+    Esri::ArcGISRuntime::OrbitGeoElementCameraController* camera_controller_OrbitGeoElement = nullptr;
+
 public:
     explicit Animate_Symbol(QWidget* parent = nullptr);
 
 private:
     void _Signal_Bind();
 private:
-    int missionFrame() const{return m_frame;}
+    int missionFrame() const{return frame_index;}
     bool missionReady() const
     {
-        if (!m_missionData)
-            return false;
-
-        return m_missionData->ready();
+        return mission_data.ready();
     }
     void setMissionFrame(int newFrame)
     {
-        if (!m_missionData||
-            newFrame < 0 ||
-            m_frame == newFrame)
+        if (newFrame < 0 || frame_index == newFrame)
             return;
 
-        m_frame = newFrame;
+        frame_index = newFrame;
         // emit missionFrameChanged();
     }
     void changeMission(const QString &missionNameStr);
     int missionSize() const
     {
-        if (!m_missionData)
-            return 0;
-
-        return (int)m_missionData->size();
+        return (int)mission_data.size();
     }
     void setFollowing(bool following)
     {
         if (following)
-            m_sceneView->setCameraController(m_followingController);
+            scene_view->setCameraController(camera_controller_OrbitGeoElement);
         else
-            m_sceneView->setCameraController(m_globeController);
+            scene_view->setCameraController(camera_controller_globe);
     }
 
     void animate();
 
     void setAnimationSpeed(double value)
     {
-        m_animationSpeed = std::clamp(value, 0.0, 100.0);
+        animation_speed = std::clamp(value, 0.0, 100.0);
         updateTimerInterval();
     }
     void updateTimerInterval();
 
     void setZoom(double zoomDist)
     {
-        if (m_followingController)
+        if (camera_controller_OrbitGeoElement)
         {
-            m_followingController->setCameraDistance(zoomDist);
+            camera_controller_OrbitGeoElement->setCameraDistance(zoomDist);
             // emit zoomChanged();
         }
     }
 
     void setAngle(double angle)
     {
-        if (m_followingController)
+        if (camera_controller_OrbitGeoElement)
         {
-            m_followingController->setCameraPitchOffset(angle);
+            camera_controller_OrbitGeoElement->setCameraPitchOffset(angle);
             // emit angleChanged();
         }
     }
