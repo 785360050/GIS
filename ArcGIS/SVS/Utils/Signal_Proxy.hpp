@@ -44,4 +44,5 @@ signals:
     void Animate_Set_Angle(double value);
     void Animate_Set_Frame(double value);
     void Animate_UI_Update_Frame_Size(int size);
+    void Animate_UI_Update_Frame_Index(int index);
 };

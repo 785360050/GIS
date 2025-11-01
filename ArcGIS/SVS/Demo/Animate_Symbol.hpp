@@ -32,36 +32,37 @@ public:
     {
         Point(){}
         Point(double lon, double lat, double elevation, double heading, double pitch, double roll):
-            m_pos(Esri::ArcGISRuntime::Point(lon, lat, elevation, Esri::ArcGISRuntime::SpatialReference::wgs84())),
-            m_heading(heading),
-            m_pitch(pitch),
-            m_roll(roll){}
+            pos(Esri::ArcGISRuntime::Point(lon, lat, elevation, Esri::ArcGISRuntime::SpatialReference::wgs84())),
+            heading(heading),
+            pitch(pitch),
+            roll(roll){}
 
-        Esri::ArcGISRuntime::Point m_pos;
-        double m_heading = NAN;
-        double m_pitch = NAN;
-        double m_roll = NAN;
+        Esri::ArcGISRuntime::Point pos;
+        double heading{};
+        double pitch{};
+        double roll{};
     };
-private:
+// private:
+public:
     std::vector<Point> point;
-    bool m_ready{false};
+    bool ready{false};
 
 public:
     Mission_Data()=default;
     ~Mission_Data()=default;
 
 public:
-    bool parse(const QString& dataPath)
+    void Load_File(const QString& file_path)
     {
         point.clear();
-        m_ready = false;
+        ready = false;
 
-        QFile file(dataPath);
+        QFile file(file_path);
         if(!file.exists())
-            return false;
+            throw std::runtime_error("file not exists");
 
         if (!file.open(QIODevice::ReadOnly))
-            return false;
+            throw std::runtime_error("file open failed");
 
         while (!file.atEnd())
         {
@@ -98,21 +99,9 @@ public:
             point.emplace_back((double)lon, (double)lat, (double)elevation, (double)heading, (double)pitch, (double)roll);
         }
 
-        m_ready = point.size() > 0;
-        return m_ready;
+        // qDebug()<<"mission point.size() = "<<point.size();
+        ready = point.size() > 0;
     }
-    bool isEmpty() const {return point.empty();}
-    size_t size() const {return point.size();}
-    const Point& operator[](size_t index) const
-    {
-        if(index < point.size())
-            return point[index];
-
-        static Mission_Data::Point dataPoint;
-        return dataPoint;
-    }
-    bool ready() const {return m_ready;}
-
 
 };
 
@@ -145,25 +134,20 @@ public:
 private:
     void _Signal_Bind();
 private:
-    int missionFrame() const{return frame_index;}
-    bool missionReady() const
+    void _Initialize_Map_View(Esri::ArcGISRuntime::GraphicsOverlay* mapOverlay);
+
+    void _Initialize_Scene_View();
+
+    void Set_Mission_Frame(int frame)
     {
-        return mission_data.ready();
-    }
-    void setMissionFrame(int newFrame)
-    {
-        if (newFrame < 0 || frame_index == newFrame)
+        if (frame < 0 or frame>=mission_data.point.size())
             return;
 
-        frame_index = newFrame;
-        // emit missionFrameChanged();
+        frame_index = frame;
     }
-    void changeMission(const QString &missionNameStr);
-    int missionSize() const
-    {
-        return (int)mission_data.size();
-    }
-    void setFollowing(bool following)
+    void Mission_Change(const QString &missionNameStr);
+
+    void Set_Camera_Following(bool following)
     {
         if (following)
             scene_view->setCameraController(camera_controller_OrbitGeoElement);
@@ -171,40 +155,12 @@ private:
             scene_view->setCameraController(camera_controller_globe);
     }
 
-    void animate();
+    void Frame_Update();
 
-    void setAnimationSpeed(double value)
-    {
-        animation_speed = std::clamp(value, 0.0, 100.0);
-        updateTimerInterval();
-    }
-    void updateTimerInterval();
-
-    void setZoom(double zoomDist)
-    {
-        if (camera_controller_OrbitGeoElement)
-        {
-            camera_controller_OrbitGeoElement->setCameraDistance(zoomDist);
-            // emit zoomChanged();
-        }
-    }
-
-    void setAngle(double angle)
-    {
-        if (camera_controller_OrbitGeoElement)
-        {
-            camera_controller_OrbitGeoElement->setCameraPitchOffset(angle);
-            // emit angleChanged();
-        }
-    }
-
+    void Update_Animate_Speed(double value);
 
 public:
-    void createRoute2d(Esri::ArcGISRuntime::GraphicsOverlay* mapOverlay);
 
-    void createModel2d(Esri::ArcGISRuntime::GraphicsOverlay* mapOverlay);
-
-    void createGraphic3D();
 
 };
 

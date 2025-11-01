@@ -29,6 +29,7 @@ ArcGIS_Window::ArcGIS_Window(QWidget *parent)
     connect(ui.camera_follow,&QPushButton::clicked,&Signal_Proxy::Instance(),&Signal_Proxy::Animate_Camera_Follow);
 
     connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_UI_Update_Frame_Size,this,[&](int size){ui.slider_frame->setMaximum(size);});
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Animate_UI_Update_Frame_Index,this,[&](int index){ui.value_frame->setText(QString::number(index));ui.slider_frame->setValue(index);});
 
     // trigger initialize status
     emit Signal_Proxy::Instance().Animate_Mission_Selected(ui.mission_select->currentText());
