@@ -26,6 +26,13 @@
          <string/>
         </property>
         <layout class="QGridLayout" name="gridLayout_16">
+         <item row="1" column="1" colspan="2">
+          <widget class="QLabel" name="value_frame">
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="3">
           <widget class="QSlider" name="slider_frame">
            <property name="maximum">
@@ -40,13 +47,6 @@
           <widget class="QLabel" name="label_7">
            <property name="text">
             <string>Frame</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Camera</string>
            </property>
           </widget>
          </item>
@@ -74,14 +74,56 @@
            </item>
           </widget>
          </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="QLabel" name="value_frame">
-           <property name="text">
-            <string>0</string>
+         <item row="3" column="0" colspan="4">
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string>Config</string>
            </property>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Camera</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QPushButton" name="camera_follow">
+              <property name="text">
+               <string>Follow</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Sync Scene&amp;Map</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="sync_viewpoint">
+              <property name="text">
+               <string>Enable</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
-         <item row="4" column="0" colspan="4">
+         <item row="5" column="0" colspan="4">
           <widget class="QGroupBox" name="groupBox_4">
            <property name="title">
             <string>OrbitGeoElementCameraController</string>
@@ -156,19 +198,6 @@
            </layout>
           </widget>
          </item>
-         <item row="3" column="3">
-          <widget class="QPushButton" name="camera_follow">
-           <property name="text">
-            <string>Follow</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="0" colspan="4">
           <widget class="QPushButton" name="button_play">
            <property name="text">
@@ -184,6 +213,29 @@
            <property name="text">
             <string>Mission</string>
            </property>
+          </widget>
+         </item>
+         <item row="6" column="0" colspan="4">
+          <widget class="QGroupBox" name="groupBox_3">
+           <property name="title">
+            <string/>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>Elevation</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="value_elevation">
+              <property name="text">
+               <string>value_elevation</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>

@@ -9,6 +9,7 @@ class SceneGraphicsView;
 #include <Graphic.h>
 #include <MapGraphicsView.h>
 #include <ModelSceneSymbol.h>
+#include <DistanceCompositeSceneSymbol.h>
 #include <GraphicsOverlay.h>
 #include <SimpleMarkerSymbol.h>
 #include <GlobeCameraController.h>
@@ -22,6 +23,8 @@ class SceneGraphicsView;
 // STL headers
 #include <cmath>
 #include <QFile>
+#include <QFuture>
+#include <QMouseEvent>
 #include <QAbstractListModel>
 
 class Mission_Data
@@ -120,7 +123,8 @@ private:
     Esri::ArcGISRuntime::Scene* scene = nullptr;
     Esri::ArcGISRuntime::SceneGraphicsView* scene_view = nullptr;
     Esri::ArcGISRuntime::MapGraphicsView* map_view = nullptr;
-    Esri::ArcGISRuntime::ModelSceneSymbol* model_3d = nullptr;
+    // Esri::ArcGISRuntime::ModelSceneSymbol* model_3d = nullptr;
+    Esri::ArcGISRuntime::DistanceCompositeSceneSymbol* model_3d = nullptr;
     Esri::ArcGISRuntime::Graphic* graphic_3d = nullptr;
     Esri::ArcGISRuntime::Graphic* graphic_2d = nullptr;
     Esri::ArcGISRuntime::SimpleMarkerSymbol* symbol_2d = nullptr;
@@ -133,6 +137,10 @@ public:
 
 private:
     void _Signal_Bind();
+    void _Syncronize_Viewpoint_To_Map_View();
+    void _Syncronize_Viewpoint_To_Scene_View();
+
+
 private:
     void _Initialize_Map_View(Esri::ArcGISRuntime::GraphicsOverlay* mapOverlay);
 
@@ -155,12 +163,21 @@ private:
             scene_view->setCameraController(camera_controller_globe);
     }
 
+    void _Update_Scene(const Mission_Data::Point &data_point);
+    void _Update_Map(const Mission_Data::Point &data_point);
     void Frame_Update();
 
     void Update_Animate_Speed(double value);
 
-public:
+    void Enable_Viewpoint_Syncronize(bool enable);
 
+
+
+public:
+    QFuture<double> m_elevationQueryFuture;
+    Esri::ArcGISRuntime::GraphicsOverlay* m_graphicsOverlay = nullptr;
+    Esri::ArcGISRuntime::Graphic* m_elevationMarker = nullptr;
+    void displayElevationOnClick(QMouseEvent &mouseEvent);
 
 };
 

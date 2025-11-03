@@ -69,6 +69,18 @@ static const QString ANGLE = QStringLiteral("angle");
 
 static QString DATA_PATH;
 
+void Animate_Symbol::_Syncronize_Viewpoint_To_Map_View()
+{
+    if (map_view && scene_view->isNavigating())
+        map_view->setViewpointAsync(scene_view->currentViewpoint(ViewpointType::CenterAndScale), 0);
+}
+
+void Animate_Symbol::_Syncronize_Viewpoint_To_Scene_View()
+{
+    if (scene_view && map_view->isNavigating())
+        scene_view->setViewpointAsync(map_view->currentViewpoint(ViewpointType::CenterAndScale), 0);
+}
+
 
 
 void Animate_Symbol::_Signal_Bind()
@@ -79,6 +91,9 @@ void Animate_Symbol::_Signal_Bind()
     connect(&Signal_Proxy::Instance(), &Signal_Proxy::Animate_Set_Angle, this, [this](double angle){camera_controller_OrbitGeoElement->setCameraPitchOffset(angle);});
     connect(&Signal_Proxy::Instance(), &Signal_Proxy::Animate_Set_Speed, this, &Animate_Symbol::Update_Animate_Speed);
     connect(&Signal_Proxy::Instance(), &Signal_Proxy::Animate_Set_Frame, this, &Animate_Symbol::Set_Mission_Frame);
+
+    connect(scene_view, &SceneGraphicsView::mouseClicked, this, &Animate_Symbol::displayElevationOnClick);
+
 
     // === 等价于 QML Timer { ... } ===
     timer = new QTimer(this);
@@ -107,7 +122,12 @@ void Animate_Symbol::_Signal_Bind()
         else
             timer->stop();
     });
+
+
+    connect(&Signal_Proxy::Instance(), &Signal_Proxy::Enable_Viewpoint_Syncronize, this, &Animate_Symbol::Enable_Viewpoint_Syncronize);
+
 }
+
 
 void Animate_Symbol::_Initialize_Map_View(GraphicsOverlay *mapOverlay)
 {
@@ -135,7 +155,11 @@ void Animate_Symbol::_Initialize_Map_View(GraphicsOverlay *mapOverlay)
     symbol_2d->setAngle(dp.heading);
 
     // create a graphic with the symbol
-    graphic_2d = new Graphic(dp.pos, symbol_2d, this);
+    // graphic_2d = new Graphic(dp.pos, symbol_2d, this);
+    graphic_2d = new Graphic;
+    graphic_2d->setSymbol(symbol_2d);
+    graphic_2d->setParent(this);
+    graphic_2d->setGeometry(dp.pos);
 
     mapOverlay->graphics()->append(graphic_2d);
 }
@@ -147,7 +171,31 @@ void Animate_Symbol::_Initialize_Scene_View()
 
     // create the ModelSceneSymbol to be animated in the 3d view
     if (!model_3d)
-        model_3d = new ModelSceneSymbol(QUrl(DATA_PATH + "/Bristol/Collada/Bristol.dae"), 10.0f, this);
+    {
+        SimpleMarkerSymbol* sms = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle::Circle, QColor("red"), 10.0f, this);
+        //! [create simple marker scene symbol]
+        const SimpleMarkerSceneSymbolStyle style = SimpleMarkerSceneSymbolStyle::Cone;
+        const QColor color("red");
+        constexpr double height = 75.0;
+        constexpr double width = 75.0;
+        constexpr double depth = 75.0;
+        const SceneSymbolAnchorPosition anchorPosition = SceneSymbolAnchorPosition::Bottom;
+        SimpleMarkerSceneSymbol* smss = new SimpleMarkerSceneSymbol(style, color, height, width, depth, anchorPosition, this);
+        //! [create simple marker scene symbol]
+
+        //! [create distance symbol ranges with each symbol type and a distance range(meters)]
+        DistanceSymbolRange* dsrModel = new DistanceSymbolRange(new ModelSceneSymbol(QUrl(DATA_PATH + "/Bristol/Collada/Bristol.dae"), 10.0f, this), 0, 999, this); // ModelSceneSymbol
+        DistanceSymbolRange* dsrCone = new DistanceSymbolRange(smss, 1000, 2999, this); // SimpleMarkerSceneSymbol
+        DistanceSymbolRange* dsrCircle = new DistanceSymbolRange(sms, 3000, 0, this); // SimpleMarkerSymbol
+
+        DistanceCompositeSceneSymbol* compositeSceneSymbol = new DistanceCompositeSceneSymbol(this);
+
+        compositeSceneSymbol->ranges()->append(dsrModel);
+        compositeSceneSymbol->ranges()->append(dsrCone);
+        compositeSceneSymbol->ranges()->append(dsrCircle);
+        //! [create distance symbol ranges with each symbol type and a distance range(meters)]
+        model_3d=compositeSceneSymbol;
+    }
 
     // get the mission data for the frame
     Mission_Data::Point dp{};
@@ -183,8 +231,6 @@ Animate_Symbol::Animate_Symbol(QWidget *parent /*=nullptr*/)
     : QWidget(parent)
 {
     DATA_PATH = defaultDataPath() + "/ArcGIS/Runtime/Data/3D";
-
-    _Signal_Bind();
 
     // Create a scene using the ArcGISTerrain BasemapStyle
     scene = new Scene(BasemapStyle::ArcGISTerrain, this);
@@ -227,11 +273,27 @@ Animate_Symbol::Animate_Symbol(QWidget *parent /*=nullptr*/)
     // set up overlay 2D graphic
     _Initialize_Map_View(mapOverlay);
 
+    {// Elevation Point in scene
+        m_elevationMarker=new Graphic(Geometry(), new SimpleMarkerSymbol(SimpleMarkerSymbolStyle::Circle, QColor("red"), 12, this), this);
+        // Set the marker to be invisible initially, will be flaggd visible when user interacts with scene for the first time, to visualise clicked position
+        m_elevationMarker->setVisible(false);
+
+        m_graphicsOverlay=new GraphicsOverlay(this);
+        // Add the marker to the graphics overlay so it will be displayed. Graphics overlay is attached to the sceneView in ::setSceneView()
+        m_graphicsOverlay->graphics()->append(m_elevationMarker);
+        // Append the graphics overlays to the sceneview, so we can visualise elevation on click
+        scene_view->graphicsOverlays()->append(m_graphicsOverlay);
+    }
+
     // Set up the UI
     QVBoxLayout *vBoxLayout = new QVBoxLayout(this);
     vBoxLayout->addWidget(scene_view);
     vBoxLayout->addWidget(map_view);
     setLayout(vBoxLayout);
+
+    _Signal_Bind();
+
+
 }
 
 void Animate_Symbol::Mission_Change(const QString &missionNameStr)
@@ -262,6 +324,7 @@ void Animate_Symbol::Mission_Change(const QString &missionNameStr)
 
     // emit missionReadyChanged();
     // emit missionSizeChanged();
+    _Update_Map(mission_data.point[frame_index]);
     Signal_Proxy::Instance().Animate_UI_Update_Frame_Size(mission_data.point.size());
 }
 
@@ -274,6 +337,39 @@ void Animate_Symbol::Update_Animate_Speed(double value)
     timer->setInterval(static_cast<int>(interval));
 }
 
+void Animate_Symbol::Enable_Viewpoint_Syncronize(bool enable)
+{
+    if(enable)
+    {
+        connect(scene_view, &SceneGraphicsView::viewpointChanged, this,&Animate_Symbol::_Syncronize_Viewpoint_To_Map_View);
+        connect(map_view, &MapGraphicsView::viewpointChanged, this,&Animate_Symbol::_Syncronize_Viewpoint_To_Scene_View);
+    }
+    else
+    {
+        disconnect(scene_view, &SceneGraphicsView::viewpointChanged, this,&Animate_Symbol::_Syncronize_Viewpoint_To_Map_View);
+        disconnect(map_view, &MapGraphicsView::viewpointChanged, this,&Animate_Symbol::_Syncronize_Viewpoint_To_Scene_View);
+
+    }
+}
+
+
+
+
+void Animate_Symbol::_Update_Scene(const Mission_Data::Point &data_point)
+{
+    // move 3D graphic to the new position
+    graphic_3d->setGeometry(data_point.pos);
+    // update attribute expressions to immediately update rotation
+    graphic_3d->attributes()->replaceAttribute(HEADING, data_point.heading);
+    graphic_3d->attributes()->replaceAttribute(PITCH, data_point.pitch);
+    graphic_3d->attributes()->replaceAttribute(ROLL, data_point.roll);
+}
+void Animate_Symbol::_Update_Map(const Mission_Data::Point &data_point)
+{
+    // move 2D graphic to the new position
+    graphic_2d->setGeometry(data_point.pos);
+    symbol_2d->setAngle(data_point.heading);
+}
 void Animate_Symbol::Frame_Update()
 {
 
@@ -281,20 +377,43 @@ void Animate_Symbol::Frame_Update()
         return;
 
     // get the data for this stage in the mission
-    const Mission_Data::Point &dp = mission_data.point[frame_index];
+    const Mission_Data::Point &data_point = mission_data.point[frame_index];
 
-    // move 3D graphic to the new position
-    graphic_3d->setGeometry(dp.pos);
-    // update attribute expressions to immediately update rotation
-    graphic_3d->attributes()->replaceAttribute(HEADING, dp.heading);
-    graphic_3d->attributes()->replaceAttribute(PITCH, dp.pitch);
-    graphic_3d->attributes()->replaceAttribute(ROLL, dp.roll);
+    // // move 3D graphic to the new position
+    // graphic_3d->setGeometry(dp.pos);
+    // // update attribute expressions to immediately update rotation
+    // graphic_3d->attributes()->replaceAttribute(HEADING, dp.heading);
+    // graphic_3d->attributes()->replaceAttribute(PITCH, dp.pitch);
+    // graphic_3d->attributes()->replaceAttribute(ROLL, dp.roll);
 
-    // move 2D graphic to the new position
-    graphic_2d->setGeometry(dp.pos);
-    symbol_2d->setAngle(dp.heading);
+    // // move 2D graphic to the new position
+    // graphic_2d->setGeometry(dp.pos);
+    // symbol_2d->setAngle(dp.heading);
+
+    _Update_Scene(data_point);
+    _Update_Map(data_point);
 }
 
+
+
+
+void Animate_Symbol::displayElevationOnClick(QMouseEvent &mouseEvent)
+{
+    // Convert clicked screen position to position on the map surface.
+    const Esri::ArcGISRuntime::Point baseSurfacePos = scene_view->screenToBaseSurface(mouseEvent.position().x(), mouseEvent.position().y());
+
+    m_elevationQueryFuture = scene->baseSurface()->elevationAsync(baseSurfacePos);
+    m_elevationQueryFuture.then(this,
+                                [this, baseSurfacePos](double elevation)
+                                {
+                                    // Place the elevation marker circle at the clicked position
+                                    m_elevationMarker->setGeometry(baseSurfacePos);
+                                    m_elevationMarker->setVisible(true);
+
+                                    Signal_Proxy::Instance().Point_Elevation_Show(elevation);
+                                });
+
+}
 
 
 

@@ -45,4 +45,5 @@ signals:
     void Animate_Set_Frame(double value);
     void Animate_UI_Update_Frame_Size(int size);
     void Animate_UI_Update_Frame_Index(int index);
+    void Enable_Viewpoint_Syncronize(bool enable);
 };
