@@ -133,12 +133,12 @@ void Animate_Symbol::_Initialize_Map_View(GraphicsOverlay *mapOverlay)
 {
     /// Route2d
     // Create a 2d graphic of a solid red line to represen the route of the mission
-    graphic_route = new Graphic(this);
+    graphic_route_map = new Graphic(this);
 
     SimpleLineSymbol *routeSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle::Solid, Qt::red, 1, this);
-    graphic_route->setSymbol(routeSymbol);
+    graphic_route_map->setSymbol(routeSymbol);
 
-    mapOverlay->graphics()->append(graphic_route);
+    mapOverlay->graphics()->append(graphic_route_map);
 
 
     /// Model2d
@@ -216,6 +216,28 @@ void Animate_Symbol::_Initialize_Scene_View()
         // create the camera controller to follow the graphic
         camera_controller_OrbitGeoElement = new OrbitGeoElementCameraController(graphic_3d, 500, this);
         scene_view->setCameraController(camera_controller_OrbitGeoElement);
+
+
+
+        {
+
+            // 1. 创建 GraphicsOverlay，并指定为 3D 模式
+            GraphicsOverlay* overlay3D = new GraphicsOverlay(this);
+
+            // 3D 模式需要设置 scene properties，否则线段可能贴地或不显示
+            overlay3D->setSceneProperties(LayerSceneProperties(SurfacePlacement::Absolute));
+
+            // 3. 创建线符号
+            SimpleLineSymbol* lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle::Solid, QColor(Qt::red), 2.0, this);
+
+            // 4. 创建 Graphic 并添加到 overlay
+            graphic_route_scene = new Graphic( this);
+            graphic_route_scene->setSymbol(lineSymbol);
+            overlay3D->graphics()->append(graphic_route_scene);
+
+            // 5. 将 overlay 添加到 SceneView
+            scene_view->graphicsOverlays()->append(overlay3D);
+        }
     }
     else
     {
@@ -305,7 +327,7 @@ void Animate_Symbol::Mission_Change(const QString &missionNameStr)
     mission_data.Load_File(DATA_PATH + "/Missions/" + formattedname.remove(" ") + ".csv");
 
     // if the mission was loaded successfully, move to the start position
-    if (mission_data.ready && graphic_route)
+    if (mission_data.ready && graphic_route_map)
     {
         // create a polyline representing the route for the mission
         PolylineBuilder *routeBldr = new PolylineBuilder(SpatialReference::wgs84(), this);
@@ -316,10 +338,31 @@ void Animate_Symbol::Mission_Change(const QString &missionNameStr)
         }
 
         // set the polyline as a graphic on the mapView
-        graphic_route->setGeometry(routeBldr->toGeometry());
+        graphic_route_map->setGeometry(routeBldr->toGeometry());
 
-        map_view->setViewpointAndWait(Viewpoint(graphic_route->geometry()));
-        _Initialize_Scene_View();
+
+
+        map_view->setViewpointAndWait(Viewpoint(graphic_route_map->geometry()));
+    }
+
+    _Initialize_Scene_View();
+    if(mission_data.ready && graphic_route_scene)
+    {
+        // 创建 polyline 构建器，WGS84 坐标系支持经纬度+高度
+        PolylineBuilder* routeBldr = new PolylineBuilder(SpatialReference::wgs84(), this);
+
+        // 遍历任务点（每个点需要有Z高度）
+        for (int i = 0; i < mission_data.point.size(); ++i)
+        {
+            const Mission_Data::Point& dp = mission_data.point[i];
+
+            // ⚠️ 确保 dp.pos 是 Point 类型且包含 (x, y, z)
+            // 例如 Point(longitude, latitude, altitude, SpatialReference::wgs84())
+            routeBldr->addPoint(dp.pos);
+        }
+
+        // 更新路径几何
+        graphic_route_scene->setGeometry(routeBldr->toGeometry());
     }
 
     // emit missionReadyChanged();

@@ -126,9 +126,10 @@ private:
     // Esri::ArcGISRuntime::ModelSceneSymbol* model_3d = nullptr;
     Esri::ArcGISRuntime::DistanceCompositeSceneSymbol* model_3d = nullptr;
     Esri::ArcGISRuntime::Graphic* graphic_3d = nullptr;
+    Esri::ArcGISRuntime::Graphic* graphic_route_scene = nullptr;
     Esri::ArcGISRuntime::Graphic* graphic_2d = nullptr;
     Esri::ArcGISRuntime::SimpleMarkerSymbol* symbol_2d = nullptr;
-    Esri::ArcGISRuntime::Graphic* graphic_route = nullptr;
+    Esri::ArcGISRuntime::Graphic* graphic_route_map = nullptr;
     Esri::ArcGISRuntime::GlobeCameraController* camera_controller_globe = nullptr;
     Esri::ArcGISRuntime::OrbitGeoElementCameraController* camera_controller_OrbitGeoElement = nullptr;
 
