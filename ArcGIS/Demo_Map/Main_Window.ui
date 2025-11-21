@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1809</width>
-    <height>819</height>
+    <width>1799</width>
+    <height>1112</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>6</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -57,6 +57,83 @@
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="0">
          <widget class="Initial_Location" name="widget_6" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_10">
+       <attribute name="title">
+        <string>Max_Extent</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="0" column="0">
+         <widget class="Viewpoint_Max_Extent" name="widget_10" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_11">
+       <attribute name="title">
+        <string>Reference_Scale</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,4">
+        <item>
+         <widget class="QGroupBox" name="groupBox_4">
+          <property name="title">
+           <string/>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>1:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="reference_scale_select">
+               <item>
+                <property name="text">
+                 <string>500000</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>250000</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>100000</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>50000</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="button_reference_scale_syncronize">
+             <property name="text">
+              <string>Set Map Scale to Reference Scale</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QListWidget" name="reference_operational_layers_list"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="Map_Reference_Scale" name="widget_11" native="true"/>
         </item>
        </layout>
       </widget>
@@ -381,6 +458,59 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_9">
+       <attribute name="title">
+        <string>Basemap_Language</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="Basemap_Language" name="widget_9" native="true"/>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>GroupBox</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QComboBox" name="basemap_language_select">
+             <item>
+              <property name="text">
+               <string>none</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Bulgarian</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Greek</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Turkish</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="basemap_language_is_global">
+             <property name="text">
+              <string>Is Global</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -390,7 +520,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1809</width>
+     <width>1799</width>
      <height>29</height>
     </rect>
    </property>
@@ -444,6 +574,24 @@
    <class>Bookmark_Manage</class>
    <extends>QWidget</extends>
    <header location="global">Demo/Bookmark_Manage.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Basemap_Language</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Basemap_Language.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Viewpoint_Max_Extent</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Viewpoint_Max_Extent.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Map_Reference_Scale</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Map_Reference_Scale.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

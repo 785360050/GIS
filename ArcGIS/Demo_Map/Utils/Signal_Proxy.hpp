@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QAbstractListModel>
 
 #include "MapTypes.h"
 
@@ -44,4 +45,12 @@ signals:
     void Bookmark_Create(QString name);
     void Bookmark_List_Update(std::vector<QString> bookmark_list);
     void Bookmark_Select_Bookmark(QString bookmark);
+
+    void Basemap_Language_Global(bool is_global);
+    void Basemap_Language_Select(QString language);
+
+    void Reference_Scale_Select(int scale_value);
+    void Reference_Scale_Syncronize();
+    void Reference_Scale_Update_Operationl_Layers(QAbstractListModel* list);
+    void Reference_Scale_Feature_Layer(const QString &layerName, bool checkedStatus);
 };

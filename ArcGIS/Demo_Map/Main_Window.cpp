@@ -58,6 +58,48 @@ Main_Window::Main_Window(QWidget *parent)
     connect(&Signal_Proxy::Instance(),&Signal_Proxy::Bookmark_List_Update,this,&Main_Window::Update_Bookmark_List);
     connect(ui.list_bookmark, &QListWidget::itemDoubleClicked,this, [&](QListWidgetItem* item){Signal_Proxy::Instance().Bookmark_Select_Bookmark(item->text());});
 
+    connect(ui.basemap_language_select,&QComboBox::currentTextChanged,&Signal_Proxy::Instance(),&Signal_Proxy::Basemap_Language_Select);
+    connect(ui.basemap_language_is_global,&QPushButton::clicked,&Signal_Proxy::Instance(),&Signal_Proxy::Basemap_Language_Global);
+
+    connect(ui.reference_scale_select,&QComboBox::currentTextChanged,&Signal_Proxy::Instance(),[&](QString text){Signal_Proxy::Instance().Reference_Scale_Select(text.toInt());});
+    connect(ui.button_reference_scale_syncronize,&QPushButton::clicked,&Signal_Proxy::Instance(),&Signal_Proxy::Reference_Scale_Syncronize);
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Reference_Scale_Update_Operationl_Layers,this,[&](QAbstractListModel* list)
+    {
+        // 清空 QListWidget
+        ui.reference_operational_layers_list->clear();
+
+        // 遍历 QAbstractListModel
+        for (int i = 0; i < list->rowCount(); ++i)
+        {
+            QModelIndex index = list->index(i, 0);
+
+            // 获取 role 数据，一般 ArcGIS layer list 用 role "name"
+            QString name = list->data(index, Qt::DisplayRole).toString();
+            if (name.isEmpty())
+                name = list->data(index, list->roleNames().key("name")).toString();
+
+            QListWidgetItem* item = new QListWidgetItem(name);
+            item->setFlags(item->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+            item->setCheckState(Qt::Checked);
+            ui.reference_operational_layers_list->addItem(item);
+        }
+
+        for (int i = 0; i < list->rowCount(); ++i)
+            ui.reference_operational_layers_list->item(i)->setSelected(true);
+    });
+    ui.reference_operational_layers_list->setSelectionMode(QAbstractItemView::NoSelection);
+    connect(ui.reference_operational_layers_list,&QListWidget::itemDoubleClicked,this,[this](QListWidgetItem* item)
+    {
+        // 切换复选框状态
+        Qt::CheckState newState =
+            (item->checkState() == Qt::Checked ? Qt::Unchecked : Qt::Checked);
+
+        item->setCheckState(newState);
+
+        // 触发自定义 toggled 信号
+        // emit itemToggled(item->text(), newState == Qt::Checked);
+        Signal_Proxy::Instance().Reference_Scale_Feature_Layer(item->text(),(bool)newState);
+    });
 }
 
 void Main_Window::Update_Bookmark_List(std::vector<QString> bookmark_list)

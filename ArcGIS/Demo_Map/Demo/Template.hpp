@@ -1,11 +1,10 @@
 #pragma once
 
-namespace Esri::ArcGISRuntime {
-class Map;
-class MapGraphicsView;
-} // namespace Esri::ArcGISRuntime
+#include <Map.h>
+#include <MapTypes.h>
+#include <MapGraphicsView.h>
 
-#include <QMainWindow>
+#include <QWidget>
 
 class Template : public QWidget
 {

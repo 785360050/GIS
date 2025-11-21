@@ -54,6 +54,10 @@ qt_add_executable(${PROJECT_NAME} ${SOURCE_FILES}
   Demo/Open_Existing_Map.cpp
   Demo/Bookmark_Manage.cpp
   Demo/Viewpoint_Change.cpp
+
+  Demo/Basemap_Language.cpp
+  Demo/Viewpoint_Max_Extent.cpp
+  Demo/Map_Reference_Scale.cpp
 )
 
 # Copy required dynamic libraries to the build folder as a post-build step.
