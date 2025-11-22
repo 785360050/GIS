@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>4</number>
+       <number>15</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -139,11 +139,21 @@
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
-        <string>Map_Spatial_Reference</string>
+        <string>Spatial_Reference</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
          <widget class="Map_Spatial_Reference" name="widget_4" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_12">
+       <attribute name="title">
+        <string>Magnifier</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="0" column="0">
+         <widget class="Map_Magnifier" name="widget_12" native="true"/>
         </item>
        </layout>
       </widget>
@@ -218,6 +228,36 @@
            </widget>
           </item>
          </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_13">
+       <attribute name="title">
+        <string>Mobile_Map_Package</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="0">
+         <widget class="Mobile_Map_Package" name="widget_13" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_14">
+       <attribute name="title">
+        <string>Geo_Package</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_11">
+        <item row="0" column="0">
+         <widget class="Geo_Package" name="widget_14" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_15">
+       <attribute name="title">
+        <string>Identify_Layers</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_12">
+        <item row="0" column="0">
+         <widget class="Identify_Layers" name="widget_15" native="true"/>
         </item>
        </layout>
       </widget>
@@ -511,6 +551,32 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_16">
+       <attribute name="title">
+        <string>Location_History</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="Location_History" name="widget_16" native="true"/>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_5">
+          <property name="title">
+           <string/>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_13">
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>Start Tracking</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -592,6 +658,36 @@
    <class>Map_Reference_Scale</class>
    <extends>QWidget</extends>
    <header location="global">Demo/Map_Reference_Scale.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Map_Magnifier</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Map_Magnifier.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Mobile_Map_Package</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Mobile_Map_Package.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Geo_Package</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Geo_Package.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Identify_Layers</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Identify_Layers.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Location_History</class>
+   <extends>QWidget</extends>
+   <header location="global">Demo/Location_History.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

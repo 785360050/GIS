@@ -9,6 +9,24 @@ Main_Window::Main_Window(QWidget *parent)
 {
     ui.setupUi(this);
 
+    // { // multiline tab
+    //     QTabBar* bar = ui.tabWidget->tabBar();
+
+    //     // 关闭滚动按钮
+    //     bar->setUsesScrollButtons(false);
+
+    //     // 允许换行（关键）
+    //     bar->setExpanding(false);   // 不自动扩展到全宽
+    //     bar->setElideMode(Qt::ElideNone);
+
+    //     // 在某些平台下需要
+    //     bar->setMovable(true);
+
+    //     // 启用多行（Qt 隐藏 API，但有效）
+    //     bar->setProperty("documentMode", false);
+    //     bar->setStyleSheet("QTabBar::tab { height: 26px; }");
+    // }
+
     connect(&Signal_Proxy::Instance(),&Signal_Proxy::Dispaly_Map_Status_Update, this, [this](Esri::ArcGISRuntime::LoadStatus loadStatus)
             {
                 switch (loadStatus)
