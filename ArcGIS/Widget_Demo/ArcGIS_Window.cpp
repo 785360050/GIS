@@ -19,6 +19,8 @@ ArcGIS_Window::ArcGIS_Window(QWidget *parent)
     connect(ui.draped_visibility,&QCheckBox::clicked,&Signal_Proxy::Instance(),&Signal_Proxy::Surface_Placement_Change_Draped_Visibility);
     connect(ui.slider_z,&QSlider::sliderMoved,&Signal_Proxy::Instance(),&Signal_Proxy::Surface_Placement_Change_Z);
 
+    connect(ui.spin_terrain_exaggeration,&QDoubleSpinBox::valueChanged,&Signal_Proxy::Instance(),&Signal_Proxy::Terrain_Exaggeration);
+
     connect(ui.radio_GlobeCameraController,&QRadioButton::clicked,&Signal_Proxy::Instance(),&Signal_Proxy::Camera_GlobeCameraController);
     connect(ui.radio_OrbitGeoElementCameraController,&QRadioButton::clicked,&Signal_Proxy::Instance(),&Signal_Proxy::Camera_OrbitGeoElementCameraController);
     connect(ui.radio_OrbitLocationCameraController,&QRadioButton::clicked,&Signal_Proxy::Instance(),&Signal_Proxy::Camera_OrbitLocationCameraControlle);

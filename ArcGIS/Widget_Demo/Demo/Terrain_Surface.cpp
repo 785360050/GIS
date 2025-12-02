@@ -24,6 +24,8 @@
 #include <QFuture>
 #include <QVBoxLayout>
 
+#include "../Utils/Signal_Proxy.hpp"
+
 using namespace Esri::ArcGISRuntime;
 
 // #define Local_File_Tile
@@ -45,6 +47,8 @@ static QString defaultDataPath()
 Terrain_Surface::Terrain_Surface(QWidget* parent /*=nullptr*/)
     : QWidget(parent)
 {
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Terrain_Exaggeration,this,[&](double value){m_scene->baseSurface()->setElevationExaggeration(value);});
+
     // Create a scene using the ArcGISTerrain BasemapStyle
     m_scene = new Scene(BasemapStyle::ArcGISTerrain, this);
 

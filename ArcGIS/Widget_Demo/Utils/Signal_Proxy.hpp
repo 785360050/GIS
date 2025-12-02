@@ -26,6 +26,8 @@ signals:
     void Surface_Placement_Change_Draped_Visibility();
     void Surface_Placement_Change_Z(int value);
 
+    void Terrain_Exaggeration(double value);
+
     void Camera_GlobeCameraController();
     void Camera_OrbitGeoElementCameraController();
     void Camera_OrbitLocationCameraControlle();
