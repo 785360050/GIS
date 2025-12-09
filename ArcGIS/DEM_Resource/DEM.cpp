@@ -34,6 +34,8 @@
 
 #include <iostream>
 
+#include "Signal_Proxy.hpp"
+
 using namespace Esri::ArcGISRuntime;
 
 // #define Demo
@@ -53,6 +55,8 @@ DEM::DEM(QWidget* parent /*=nullptr*/)
     // 输出空间参考的信息
     std::cout << "当前空间参考：" << spatialReference.wkText().toStdString()<<std::endl;
 
+    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Sync_Viewpoint,this,[&](const Esri::ArcGISRuntime::Camera& camera){m_sceneView->setViewpointCameraAndWait(camera);});
+
 #ifdef Demo
 
     // create a new elevation source from Terrain3D rest service
@@ -60,7 +64,7 @@ DEM::DEM(QWidget* parent /*=nullptr*/)
 
     auto surface = m_scene->baseSurface();
     surface->elevationSources()->append(elevationSource);// add the elevation source to the scene to display elevation
-    surface->setElevationExaggeration(3.28084);
+    // surface->setElevationExaggeration(3.28084);
     m_scene->setBaseSurface(surface);
 
     // create a camera

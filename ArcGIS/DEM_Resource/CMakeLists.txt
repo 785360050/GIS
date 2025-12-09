@@ -40,7 +40,9 @@ find_package(ArcGISRuntime 200.8.0 COMPONENTS REQUIRED Cpp)
 set(SOURCE_FILES
   main.cpp
   DEM.cpp
-  DEM.h)
+  Shapefile.cpp
+  Signal_Proxy.cpp
+)
 
 qt_add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 

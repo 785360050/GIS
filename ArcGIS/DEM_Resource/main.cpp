@@ -19,6 +19,7 @@
 #include "ArcGISRuntimeEnvironment.h"
 
 #include "DEM.h"
+#include "Shapefile.h"
 
 using namespace Esri::ArcGISRuntime;
 
@@ -81,6 +82,10 @@ int main(int argc, char *argv[])
     applicationWindow.setMinimumWidth(800);
     applicationWindow.setMinimumHeight(600);
     applicationWindow.show();
+
+    // Shapefile shapefile;
+    // shapefile.resize(800,600);
+    // shapefile.show();
 
     return application.exec();
 }
