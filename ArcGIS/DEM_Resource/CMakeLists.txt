@@ -42,6 +42,9 @@ set(SOURCE_FILES
   DEM.cpp
   Shapefile.cpp
   Signal_Proxy.cpp
+
+  Layer_Mesh_Integrated.cpp
+  Tile_Layer_3D.cpp
 )
 
 qt_add_executable(${PROJECT_NAME} ${SOURCE_FILES})

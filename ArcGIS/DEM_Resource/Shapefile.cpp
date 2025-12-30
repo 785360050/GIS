@@ -51,7 +51,10 @@ Shapefile::Shapefile(QWidget* parent /*=nullptr*/)
     // QString file_path="/mnt/Github/GIS/ArcGIS/DEM_Resource/Resource/terrain_data_directory/general_shapefiles_and_images/AFR_voidMap.shp";
     // QString file_path="/mnt/Github/GIS/ArcGIS/DEM_Resource/Resource/terrain_data_directory/general_shapefiles_and_images/tile_index.shp";
     // QString file_path="/mnt/Github/GIS/ArcGIS/DEM_Resource/Resource/terrain_data_directory/general_shapefiles_and_images/Source_SRTM.shp";
-    QString file_path="/mnt/Github/GIS/ArcGIS/DEM_Resource/Resource/terrain_data_directory/general_shapefiles_and_images/Source_RADARSAT.shp"; // fine
+    // QString file_path="/mnt/Github/GIS/ArcGIS/DEM_Resource/Resource/terrain_data_directory/general_shapefiles_and_images/Source_RADARSAT.shp"; // fine
+    QString file_path="/mnt/Github/GIS/ArcGIS/DEM_Resource/Resource/上海/上海.shp"; // fine
+    // QString file_path="/mnt/Github/GIS/ArcGIS/DEM_Resource/Resource/上海_Floor/上海_ExportFeatures.shp"; // error
+
     auto* table = new ShapefileFeatureTable(file_path, this);
     auto* layer = new FeatureLayer(table, this);
 

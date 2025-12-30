@@ -21,6 +21,9 @@
 #include "DEM.h"
 #include "Shapefile.h"
 
+#include "Layer_Mesh_Integrated.hpp"
+#include "Tile_Layer_3D.hpp"
+
 using namespace Esri::ArcGISRuntime;
 
 int main(int argc, char *argv[])
@@ -79,13 +82,20 @@ int main(int argc, char *argv[])
     //  }
 
     DEM applicationWindow;
-    applicationWindow.setMinimumWidth(800);
-    applicationWindow.setMinimumHeight(600);
+    applicationWindow.resize(800,600);
     applicationWindow.show();
 
     // Shapefile shapefile;
     // shapefile.resize(800,600);
     // shapefile.show();
+
+    // Layer_Mesh_Integrated layer_mesh;
+    // layer_mesh.resize(800,600);
+    // layer_mesh.show();
+
+    // Tile_Layer_3D tile_layer;
+    // tile_layer.resize(800,600);
+    // tile_layer.show();
 
     return application.exec();
 }
