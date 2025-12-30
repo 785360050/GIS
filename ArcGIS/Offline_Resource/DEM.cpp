@@ -164,9 +164,9 @@ DEM::DEM(QWidget* parent /*=nullptr*/)
 
 #include <QMessageBox>
 
-QString m_mapTifPath = "/mnt/Workspace/Experiment/DEM_Resource/Resource/Basemap/cliped.tif";
-QString m_elevTifPath = "/mnt/Workspace/Experiment/DEM_Resource/Resource/Elevation/output_hh.tif";
-QString gpkgPath = "/mnt/Workspace/Experiment/DEM_Resource/Resource/Building/us_building.gpkg";
+QString m_mapTifPath = "../../Resource/Basemap/cliped.tif";
+QString m_elevTifPath = "../../Resource/Elevation/output_hh.tif";
+QString gpkgPath = "../../Resource/Building/us_building.gpkg";
 
 void DEM::loadDataAndPrintExtent()
 {
