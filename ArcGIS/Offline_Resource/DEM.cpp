@@ -1,36 +1,57 @@
-// Copyright 2025 ESRI
-//
-// All rights reserved under the copyright laws of the United States
-// and applicable international laws, treaties, and conventions.
-//
-// You may freely redistribute and use this sample code, with or
-// without modification, provided you include the original copyright
-// notice and use restrictions.
-//
-// See the Sample code usage restrictions document for further information.
-//
-
-// Other headers
 #include "DEM.h"
 
-// C++ API headers
-#include "ArcGISTiledElevationSource.h"
-#include "ElevationSourceListModel.h"
-#include "MapTypes.h"
-#include "RasterElevationSource.h"
-#include "Scene.h"
-#include "SceneGraphicsView.h"
-#include "Surface.h"
-#include "Envelope.h"
-#include "Viewpoint.h"
-#include "SpatialReference.h"
-#include "Error.h"
-#include "Point.h"
-#include "Camera.h"
+#include <SpatialReference.h>
+#include <Point.h>
 
-#include <QUrl>
+#include <ShapefileInfo.h>
+#include <SceneGraphicsView.h>
+#include <Surface.h>
+#include <SceneView.h>      // 3D 视图
+#include <RendererSceneProperties.h> // 3D 渲染属性
+#include <Envelope.h>          // 包围盒
+#include <SymbolTypes.h>
+#include <LayerListModel.h>
+#include <SceneViewTypes.h>
+#include <ElevationSourceListModel.h>
+#include <MapTypes.h>
+
+#include <Scene.h>
+#include <Error.h>
+#include <Basemap.h>
+#include <ShapefileFeatureTable.h>
+#include <FeatureLayer.h>
+#include <SimpleRenderer.h>
+#include <SimpleFillSymbol.h>
+#include <SimpleLineSymbol.h>
+#include <RendererSceneProperties.h>
+#include <Camera.h>
+#include <BackgroundGrid.h>
+#include <Viewpoint.h>
+#include <TaskWatcher.h>
+#include <ArcGISTiledLayer.h>
+#include <RasterLayer.h>
+#include <Raster.h>
+#include <RasterElevationSource.h>
+#include <GeometryEngine.h>
+
+#include <MinMaxStretchParameters.h>
+#include <GeoPackage.h>
+#include <FeatureTable.h>
+#include <UniqueValue.h>
+#include <UniqueValueRenderer.h>
+#include <UniqueValueListModel.h>
+#include <ArcGISSceneLayer.h>
+#include <LayerSceneProperties.h>
+
+#include <QDir>
+#include <QVBoxLayout>
 #include <QFileInfo>
 #include <QFuture>
+#include <QApplication>
+#include <QUrl>
+#include <QFutureWatcher>
+#include <QMessageBox>
+#include <QStringList>
 
 #include <iostream>
 
@@ -44,322 +65,49 @@ DEM::DEM(QWidget* parent /*=nullptr*/)
     : QMainWindow(parent)
 {
     // Create a scene using the ArcGISTerrain BasemapStyle
-    m_scene = new Scene(BasemapStyle::ArcGISTerrain, this);
+    // m_scene = new Scene(BasemapStyle::ArcGISTerrain, this);
     // m_scene = new Scene(BasemapStyle::ArcGISImagery, this);
 
     // Create a scene view, and pass in the scene
+    // m_sceneView = new SceneGraphicsView(m_scene, this);
+
+    m_scene = new Scene(this);
+    m_scene->setBasemap(nullptr); // 离线模式，清空在线底图
     m_sceneView = new SceneGraphicsView(m_scene, this);
+    m_sceneView->setSunLighting(LightingMode::LightAndShadows);
+    m_sceneView->setSunLighting(LightingMode::NoLight);
 
-    // 假设您有一个场景（Scene）对象
     Esri::ArcGISRuntime::SpatialReference spatialReference = m_scene->spatialReference();
-
-    // 输出空间参考的信息
     std::cout << "当前空间参考：" << spatialReference.wkText().toStdString()<<std::endl;
 
-    connect(&Signal_Proxy::Instance(),&Signal_Proxy::Sync_Viewpoint,this,[&](const Esri::ArcGISRuntime::Camera& camera){m_sceneView->setViewpointCameraAndWait(camera);});
-
-#ifdef Demo
-
-    // create a new elevation source from Terrain3D rest service
-    ArcGISTiledElevationSource *elevationSource = new ArcGISTiledElevationSource(QUrl("https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer"), this);
-
-    auto surface = m_scene->baseSurface();
-    surface->elevationSources()->append(elevationSource);// add the elevation source to the scene to display elevation
-    surface->setElevationExaggeration(3.28084);
-    m_scene->setBaseSurface(surface);
-
-    // create a camera
-    constexpr double latitude = 33.961;
-    constexpr double longitude = -118.808;
-    constexpr double altitude = 2000;
-    constexpr double heading = 0;
-    constexpr double pitch = 75;
-    constexpr double roll = 0;
-    Camera camera{latitude, longitude, altitude, heading, pitch, roll};
-    // set the viewpoint to the camera
-    m_sceneView->setViewpointCameraAndWait(camera);
-#else
-
-
-
-    // create the MontereyElevation data path
-    // data is downloaded automatically by the sample viewer app. Instructions to download
-    // separately are specified in the readme.
-    // const QString montereyRasterElevationPath = QString{"../../Resource/Copernicus_USA.tif"};//Copernicus
-    // const QString montereyRasterElevationPath = QString{"../../Resource/srtm_36_02.img"};//地理空间数据云
-    // const QString montereyRasterElevationPath = QString{"../../Resource/N34W119.hgt"};//30M SRTM
-    const QString montereyRasterElevationPath = QString{"../../Resource/exportImage.tiff"};//ETOPO
-    // const QString montereyRasterElevationPath = QString{"../../Resource/ALPSMLC30_N034W119_DSM.tif"};//AW3D30 DSM
-
-    //Before attempting to add any layers, check that the file for the elevation source exists at all.
-    const bool srcElevationFileExists = QFileInfo::exists(montereyRasterElevationPath);
-
-    if(srcElevationFileExists)
-    {
-        //Create the elevation source from the local raster(s). RasterElevationSource can take multiple files as inputs, but in this case only takes one.
-        RasterElevationSource* elevationSrc = new RasterElevationSource{QStringList{montereyRasterElevationPath}, this};
-
-        // 添加更详细的加载状态监控
-        connect(elevationSrc, &RasterElevationSource::doneLoading, this, [&](const Error& loadError)
-                {
-                    if(loadError.isEmpty()) {
-                        qInfo() << "高程源加载成功";
-
-                        // 获取数据范围并输出
-                        // Esri::ArcGISRuntime::Envelope extent = elevationSrc->fullExtent();
-                        // qInfo() << "数据范围:"
-                        //         << "xmin: " << extent.xMin()
-                        //         << "xmax: " << extent.xMax()
-                        //         << "ymin: " << extent.yMin()
-                        //         << "ymax: " << extent.yMax();
-
-                        // 获取空间参考信息并输出
-                        // Esri::ArcGISRuntime::SpatialReference spatialRef = elevationSrc->spatialReference();
-                        // qInfo() << "空间参考:" << spatialRef.wkt();  // 使用 wkt() 获取空间参考的 WKT 表示形式
-                    } else {
-                        qWarning() << "加载错误:" << loadError.message();
-                    }
-                });
-
-
-        // add the elevation source to the scene to display elevation
-        m_scene->baseSurface()->elevationSources()->append(elevationSrc);
-        // m_scene->baseSurface()->setElevationExaggeration(3.28084);
-    }
-    else
-    {
-        qWarning() << "Could not find file at : " << montereyRasterElevationPath << ". Elevation source not set.";
-    }
-
-    // // 直接定位到上海
-    // Point cameraPoint(-121.6, 31.2, 1000, SpatialReference::wgs84());
-    // Camera camera(cameraPoint, 0, 45, 0);
-    // m_sceneView->setViewpointCameraAsync(camera);
-
-    // create a camera
-    constexpr double latitude = 33.961;
-    constexpr double longitude = -118.808;
-    constexpr double altitude = 2000;
-    constexpr double heading = 0;
-    constexpr double pitch = 75;
-    constexpr double roll = 0;
-    Camera camera{latitude, longitude, altitude, heading, pitch, roll};
-    // set the viewpoint to the camera
-    m_sceneView->setViewpointCameraAndWait(camera);
-
-#endif
-
-    useGeoPackageBuild();
+    Load_Resource();
 
     // set the sceneView as the central widget
     setCentralWidget(m_sceneView);
 }
 
-#include <PercentClipStretchParameters.h>
-#include <StretchRenderer.h>
-#include <LayerSceneProperties.h>
-#include <Raster.h>
-#include <RasterLayer.h>
-#include <Basemap.h>
-
-#include <QMessageBox>
-
-QString m_mapTifPath = "../../Resource/Basemap/cliped.tif";
-QString m_elevTifPath = "../../Resource/Elevation/output_hh.tif";
-QString gpkgPath = "../../Resource/Building/us_building.gpkg";
-
-void DEM::loadDataAndPrintExtent()
+QString FILE_PATH_BASE_MAP = "../../Resource/Basemap/cliped.tif";
+QString FILE_PATH_ELEVATION = "../../Resource/Elevation/output_hh.tif";
+QString FILE_PATH_GEO_PACKAGE = "../../Resource/Building/test1.gpkg";
+void DEM::Load_Resource()
 {
-    if (!QFile::exists(m_mapTifPath) || !QFile::exists(m_elevTifPath))
+    if (!QFile::exists(FILE_PATH_BASE_MAP) || !QFile::exists(FILE_PATH_ELEVATION))
     {
         QMessageBox::critical(this, "文件缺失", "请检查代码中的 TIF 文件路径！");
         return;
     }
-    //必须先加载高程
-    Load_Elevation();
-    Load_Basemap();
+
+    //必须先加载高程，再底图，最后建筑
+    _Load_Elevation();
+    _Load_Basemap();
 
 }
 
-
-#include "ElevationSourceListModel.h"
-#include "GraphicsOverlay.h"
-#include "SceneViewTypes.h"
-#include "SymbolTypes.h"
-
-#include <LayerListModel.h>
-#include <GeoPackage.h>
-#include <FeatureLayer.h>
-#include <LayerSceneProperties.h>
-#include <UniqueValueRenderer.h>
-#include <SimpleFillSymbol.h>
-#include <SimpleLineSymbol.h>
-#include <UniqueValue.h>
-#include <UniqueValueListModel.h>
-#include <RendererSceneProperties.h>
-
-// Esri::ArcGISRuntime::FeatureLayer* m_buildingLayer;
-void DEM::useGeoPackageBuild()
-{
-    //加载建筑数据
-    if (!QFile::exists(gpkgPath))return;
-
-    // 1. 打开 GPKG
-    GeoPackage* gpkg = new GeoPackage(gpkgPath, this);
-
-    if(!std::filesystem::exists(gpkgPath.toStdString()))
-        qDebug()<<"gpkg not found";
-
-    connect(gpkg, &GeoPackage::doneLoading, this, [this, gpkg](const Error& e)
-            {
-                if (!e.isEmpty())
-                {
-                    qDebug() << "GPKG 加载失败:" << e.message();
-                    return;
-                }
-
-                // 2. 获取第一个图层
-                if (gpkg->geoPackageFeatureTables().isEmpty()) return;
-                FeatureTable* table = (FeatureTable*)gpkg->geoPackageFeatureTables().at(0);
-
-                // 3. 创建 FeatureLayer
-                Esri::ArcGISRuntime::FeatureLayer* m_buildingLayer = new FeatureLayer(table, this);// 建筑要素层
-
-                // 4. static不显示
-                m_buildingLayer->setRenderingMode(FeatureRenderingMode::Dynamic);
-
-                LayerSceneProperties layerProps(SurfacePlacement::Relative);
-                m_buildingLayer->setSceneProperties(layerProps);
-
-                UniqueValueRenderer* typeRenderer = new UniqueValueRenderer(this);
-
-                QStringList fieldNames = typeRenderer->fieldNames();  // OSM 数据常用 "building"
-                fieldNames.append("building");
-                typeRenderer->setFieldNames(fieldNames);
-                // 定义颜色和符号创建辅助函数
-                auto createFillSymbol = [](const QColor& color, QObject* parent = nullptr) -> SimpleFillSymbol* {
-                    SimpleFillSymbol* symbol = new SimpleFillSymbol(SimpleFillSymbolStyle::Solid, color, parent);
-                    SimpleLineSymbol* outline = new SimpleLineSymbol(SimpleLineSymbolStyle::Solid, QColor(50,50,50), 1.0, parent);
-                    symbol->setOutline(outline);
-                    return symbol;
-                };
-
-                QColor residentialColor(255, 140, 0, 255);   // 深橙 - 居住类  255不透明  0完全透明
-                QColor educationColor(30, 144, 255, 255);    // 道奇蓝 - 教育类
-                QColor commercialColor(50, 205, 50, 255);    // 酸橙绿 - 商业类
-                QColor publicColor(138, 43, 226, 255);       // 蓝紫 - 公共设施类
-                QColor otherColor(169, 169, 169, 255);       // 深灰 - 其他
-
-                // ========== 居住类 ==========
-                QStringList residentialTypes =
-                    {
-                        "apartments", "dormitory", "residential", "house", "detached",
-                        "semidetached_house", "static_caravan", "bungalow", "hut"
-                    };
-
-                for (const QString& type : residentialTypes)
-                {
-                    QVariantList values;
-                    values << type;  // 必须包装成 QVariantList
-
-                    UniqueValue* uv = new UniqueValue(
-                        "居住类",                         // label（图例显示）
-                        QString("居住建筑：%1").arg(type), // description
-                        values,                           // values
-                        createFillSymbol(residentialColor, this), // symbol
-                        this                              // parent
-                        );
-                    typeRenderer->uniqueValues()->append(uv);
-                }
-
-                // ========== 教育类 ==========
-                QStringList educationTypes = {"university", "school", "college", "kindergarten"};
-                for (const QString& type : educationTypes)
-                {
-                    QVariantList values;
-                    values << type;
-
-                    UniqueValue* uv = new UniqueValue(
-                        "教育类",
-                        QString("教育设施：%1").arg(type),
-                        values,
-                        createFillSymbol(educationColor, this),
-                        this
-                        );
-                    typeRenderer->uniqueValues()->append(uv);
-                }
-
-                // ========== 商业/办公类 ==========
-                QStringList commercialTypes =
-                    {
-                        "office", "commercial", "retail", "supermarket", "warehouse",
-                        "industrial", "industry", "service"
-                    };
-                for (const QString& type : commercialTypes)
-                {
-                    QVariantList values;
-                    values << type;
-
-                    UniqueValue* uv = new UniqueValue(
-                        "商业类",
-                        QString("商业建筑：%1").arg(type),
-                        values,
-                        createFillSymbol(commercialColor, this),
-                        this
-                        );
-                    typeRenderer->uniqueValues()->append(uv);
-                }
-
-                // ========== 公共设施类 ==========
-                QStringList publicTypes =
-                    {
-                        "hospital", "civic", "transportation", "train_station", "railway",
-                        "dam", "stadium", "sports_centre", "grandstand", "pavilion",
-                        "public", "mosque", "temple", "church", "hangar", "carport",
-                        "shed", "gatehouse", "greenhouse"
-                    };
-                for (const QString& type : publicTypes)
-                {
-                    QVariantList values;
-                    values << type;
-
-                    UniqueValue* uv = new UniqueValue(
-                        "公共设施",
-                        QString("公共建筑：%1").arg(type),
-                        values,
-                        createFillSymbol(publicColor, this),
-                        this
-                        );
-                    typeRenderer->uniqueValues()->append(uv);
-                }
-
-                // ========== 其他类（默认符号）==========
-                SimpleFillSymbol* defaultSymbol = createFillSymbol(otherColor, this);
-                typeRenderer->setDefaultSymbol(defaultSymbol);
-                typeRenderer->setDefaultLabel("其他");
-
-                RendererSceneProperties sceneProps = typeRenderer->sceneProperties();
-                sceneProps.setExtrusionMode(ExtrusionMode::BaseHeight);
-                //这里calc_height是我自己在QGIS中设置的一个属性
-                // sceneProps.setExtrusionExpression("[calc_height]");
-                sceneProps.setExtrusionExpression("[tags.height]");
-
-                typeRenderer->setSceneProperties(sceneProps);
-                m_buildingLayer->setRenderer(typeRenderer);
-
-                m_scene->operationalLayers()->append(m_buildingLayer);
-                qDebug() << "GeoPackage 建筑加载成功！";
-            });
-
-    gpkg->load();
-
-}
-
-void DEM::Load_Elevation()
+void DEM::_Load_Elevation()
 {
     // 先加载高程数据
     Surface* surface = new Surface(this);
-    RasterElevationSource* elevSrc = new RasterElevationSource(QStringList{m_elevTifPath}, this);
+    RasterElevationSource* elevSrc = new RasterElevationSource(QStringList{FILE_PATH_ELEVATION}, this);
     surface->elevationSources()->append(elevSrc);
     // 允许地下导航，防止相机稍微低一点就黑屏
     surface->setNavigationConstraint(NavigationConstraint::None);
@@ -372,68 +120,198 @@ void DEM::Load_Elevation()
     m_scene->setBaseSurface(surface);
 }
 
-void DEM::Load_Basemap()
+void DEM::_Load_Basemap()
 {
     // 加载底图
-    Raster* mapRaster = new Raster(m_mapTifPath, this);
-    RasterLayer* mapLayer = new RasterLayer(mapRaster, this);
+    Raster* mapRaster = new Raster(FILE_PATH_BASE_MAP, this);
+    // RasterLayer* mapLayer = new RasterLayer(mapRaster, this);
+    mapLayer = new RasterLayer(mapRaster, this);
     // 连接信号：当地图加载完成后执行
-    connect(mapLayer, &Layer::doneLoading, this, [this, mapLayer](const Error& e)
+    // connect(mapLayer, &Layer::doneLoading, this, &DEM::Handle_MapLayer);
+    connect(mapLayer, &Layer::doneLoading, this, [&](const Esri::ArcGISRuntime::Error &e)
             {
-                if (!e.isEmpty()) {
+                if (!e.isEmpty())
+                {
                     qDebug() << "底图加载失败" << e.message();
                     return;
                 }
 
-                // 获取底图的栅格数据
-                Raster* raster = mapLayer->raster();
-                if (!raster) return;
-
-                // 确保 Raster 本身也加载完成了
-                // Layer 加载完不代表 Raster 的元数据（如波段数）已经准备好
-                // 如果 Raster 还没 Loaded，我们强制让它 Load，或者等待
-                if (raster->loadStatus() != LoadStatus::Loaded)
-                {
-                    connect(raster, &Raster::doneLoading, this, [this, mapLayer, raster](const Error& err)
-                            {
-                                if (err.isEmpty())
-                                {
-                                    // Raster 加载完后，再次尝试应用渲染
-                                    Config_Renderer(mapLayer, raster);
-                                }
-                            });
-                    raster->load(); // 触发加载
-                } else {
-                    // 如果已经 Ready，直接应用
-                    Config_Renderer(mapLayer, raster);
-                }
-
-                // useEsriOnlineBuild();
-                useGeoPackageBuild();
-                // 获取图层范围并设置镜头
-                Set_Camera(mapLayer->fullExtent());
+                Handle_MapLayer();
             });
 
     Basemap* basemap = new Basemap(mapLayer, this);
     m_scene->setBasemap(basemap);
 }
 
-#include <RGBRenderer.h>
-void DEM::Config_Renderer(Esri::ArcGISRuntime::RasterLayer *layer, Esri::ArcGISRuntime::Raster *raster)
+void DEM::_Load_GeoPackage()
 {
-    // 准备拉伸参数：去除最亮和最暗的 2% 噪点 (解决灰色/黑暗问题)
-    PercentClipStretchParameters stretchParams(2.0, 2.0);
-    RGBRenderer* newRenderer = new RGBRenderer(
-        stretchParams,
-        QList<int>{0, 1, 2},
-        QList<double>{1.0, 1.0, 1.0}, // Gammas
-        true, // estimateStats: 必须为 true，否则是一片黑/灰
-        this
-        );
-    layer->setRenderer(newRenderer);
+    //加载建筑数据
+    if (!QFile::exists(FILE_PATH_GEO_PACKAGE))return;
+
+    // 1. 打开 GPKG
+    GeoPackage* gpkg = new GeoPackage(FILE_PATH_GEO_PACKAGE, this);
+
+    connect(gpkg, &GeoPackage::doneLoading, this, [this, gpkg](const Error& e)
+            {
+                if (!e.isEmpty())
+                {
+                    qDebug() << "GPKG 加载失败:" << e.message();
+                    return;
+                }
+
+                Handle_Building(gpkg);
+            });
+
+    gpkg->load();
+
 }
-#include <GeometryEngine.h>
-void DEM::Set_Camera(const Esri::ArcGISRuntime::Envelope &ext)
+
+
+void DEM::Handle_MapLayer()
+{
+
+    _Load_GeoPackage();
+    // 获取图层范围并设置镜头
+    Set_Camera_Extent(mapLayer->fullExtent());
+}
+
+void DEM::Handle_Building(Esri::ArcGISRuntime::GeoPackage *gpkg)
+{
+
+
+    // 2. 获取第一个图层
+    if (gpkg->geoPackageFeatureTables().isEmpty()) return;
+    FeatureTable* table = (FeatureTable*)gpkg->geoPackageFeatureTables().at(0);
+
+    // 3. 创建 FeatureLayer
+    m_buildingLayer = new FeatureLayer(table, this);
+
+    // 4. static不显示
+    m_buildingLayer->setRenderingMode(FeatureRenderingMode::Dynamic);
+
+    LayerSceneProperties layerProps(SurfacePlacement::Relative);
+    m_buildingLayer->setSceneProperties(layerProps);
+
+    UniqueValueRenderer* typeRenderer = new UniqueValueRenderer(this);
+
+    QStringList fieldNames = typeRenderer->fieldNames();  // OSM 数据常用 "building"
+    fieldNames.append("building");
+    typeRenderer->setFieldNames(fieldNames);
+    // 定义颜色和符号创建辅助函数
+    auto createFillSymbol = [](const QColor& color, QObject* parent = nullptr) -> SimpleFillSymbol* {
+        SimpleFillSymbol* symbol = new SimpleFillSymbol(SimpleFillSymbolStyle::Solid, color, parent);
+        SimpleLineSymbol* outline = new SimpleLineSymbol(SimpleLineSymbolStyle::Solid, QColor(50,50,50), 1.0, parent);
+        symbol->setOutline(outline);
+        return symbol;
+    };
+
+    QColor residentialColor(255, 140, 0, 255);   // 深橙 - 居住类  255不透明  0完全透明
+    QColor educationColor(30, 144, 255, 255);    // 道奇蓝 - 教育类
+    QColor commercialColor(50, 205, 50, 255);    // 酸橙绿 - 商业类
+    QColor publicColor(138, 43, 226, 255);       // 蓝紫 - 公共设施类
+    QColor otherColor(169, 169, 169, 255);       // 深灰 - 其他
+
+    // ========== 居住类 ==========
+    QStringList residentialTypes =
+        {
+            "apartments", "dormitory", "residential", "house", "detached",
+            "semidetached_house", "static_caravan", "bungalow", "hut"
+        };
+
+    for (const QString& type : residentialTypes)
+    {
+        QVariantList values;
+        values << type;  // 必须包装成 QVariantList
+
+        UniqueValue* uv = new UniqueValue(
+            "居住类",                         // label（图例显示）
+            QString("居住建筑：%1").arg(type), // description
+            values,                           // values
+            createFillSymbol(residentialColor, this), // symbol
+            this                              // parent
+            );
+        typeRenderer->uniqueValues()->append(uv);
+    }
+
+    // ========== 教育类 ==========
+    QStringList educationTypes = {"university", "school", "college", "kindergarten"};
+    for (const QString& type : educationTypes)
+    {
+        QVariantList values;
+        values << type;
+
+        UniqueValue* uv = new UniqueValue(
+            "教育类",
+            QString("教育设施：%1").arg(type),
+            values,
+            createFillSymbol(educationColor, this),
+            this
+            );
+        typeRenderer->uniqueValues()->append(uv);
+    }
+
+    // ========== 商业/办公类 ==========
+    QStringList commercialTypes =
+        {
+            "office", "commercial", "retail", "supermarket", "warehouse",
+            "industrial", "industry", "service"
+        };
+    for (const QString& type : commercialTypes)
+    {
+        QVariantList values;
+        values << type;
+
+        UniqueValue* uv = new UniqueValue(
+            "商业类",
+            QString("商业建筑：%1").arg(type),
+            values,
+            createFillSymbol(commercialColor, this),
+            this
+            );
+        typeRenderer->uniqueValues()->append(uv);
+    }
+
+    // ========== 公共设施类 ==========
+    QStringList publicTypes =
+        {
+            "hospital", "civic", "transportation", "train_station", "railway",
+            "dam", "stadium", "sports_centre", "grandstand", "pavilion",
+            "public", "mosque", "temple", "church", "hangar", "carport",
+            "shed", "gatehouse", "greenhouse"
+        };
+    for (const QString& type : publicTypes)
+    {
+        QVariantList values;
+        values << type;
+
+        UniqueValue* uv = new UniqueValue(
+            "公共设施",
+            QString("公共建筑：%1").arg(type),
+            values,
+            createFillSymbol(publicColor, this),
+            this
+            );
+        typeRenderer->uniqueValues()->append(uv);
+    }
+
+    // ========== 其他类（默认符号）==========
+    SimpleFillSymbol* defaultSymbol = createFillSymbol(otherColor, this);
+    typeRenderer->setDefaultSymbol(defaultSymbol);
+    typeRenderer->setDefaultLabel("其他");
+
+    RendererSceneProperties sceneProps = typeRenderer->sceneProperties();
+    sceneProps.setExtrusionMode(ExtrusionMode::BaseHeight);
+    //这里calc_height是我自己在QGIS中设置的一个属性
+    sceneProps.setExtrusionExpression("[calc_height]");
+
+    typeRenderer->setSceneProperties(sceneProps);
+    m_buildingLayer->setRenderer(typeRenderer);
+
+    m_scene->operationalLayers()->append(m_buildingLayer);
+    qDebug() << "GeoPackage 建筑加载成功！";
+}
+
+void DEM::Set_Camera_Extent(const Esri::ArcGISRuntime::Envelope &ext)
 {
     if (!ext.isValid() || ext.isEmpty())
     {
@@ -450,15 +328,9 @@ void DEM::Set_Camera(const Esri::ArcGISRuntime::Envelope &ext)
     // 乘以 1.5 是为了让相机离得稍微远一点，能看清全貌。
     double targetAlt = (ext.width() * 1.5) + 2000.0;
     Camera cam(centerWgs84.y(), centerWgs84.x(), targetAlt + 3000, 0, 0, 0);
-
-    // const double latitude = 28.4;
-    // const double longitude = 83.9;
-    // const double altitude = 10010.0;
-    // const double heading = 10.0;
-    // const double pitch = 80.0;
-    // const double roll = 0.0;
-    // Camera cam(latitude, longitude, altitude, heading, pitch, roll);
     m_sceneView->setViewpointCameraAsync(cam, 2.0f);
 }
 
-DEM::~DEM() = default;
+
+
+

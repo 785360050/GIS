@@ -45,6 +45,7 @@ DEM::DEM(QWidget* parent /*=nullptr*/)
 {
     // Create a scene using the ArcGISTerrain BasemapStyle
     m_scene = new Scene(BasemapStyle::ArcGISTerrain, this);
+    // m_scene = new Scene(BasemapStyle::ArcGISImagery, this);
 
     // Create a scene view, and pass in the scene
     m_sceneView = new SceneGraphicsView(m_scene, this);

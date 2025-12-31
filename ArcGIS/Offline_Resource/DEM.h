@@ -16,6 +16,8 @@
 #include "Scene.h"
 #include <RasterLayer.h>
 #include <Raster.h>
+#include <FeatureLayer.h>
+#include <GeoPackage.h>
 
 #include <QApplication>
 
@@ -28,27 +30,38 @@ class SceneGraphicsView;
 class DEM : public QMainWindow
 {
     Q_OBJECT
-public slots:
-private:
-    Esri::ArcGISRuntime::Scene* m_scene = nullptr;
-    Esri::ArcGISRuntime::SceneGraphicsView* m_sceneView = nullptr;
 
-    // QString gpkgPath = "/mnt/Workspace/Experiment/DEM_Resource/Resource/us_building.gpkg";
+private:
+    Esri::ArcGISRuntime::SceneGraphicsView *m_sceneView = nullptr;
+    Esri::ArcGISRuntime::Scene *m_scene;
+
+
+private:
+
+    // Esri::ArcGISRuntime::RasterLayer* m_rasterLayer;
+    // Esri::ArcGISRuntime::RasterElevationSource* m_elevationSource;
+    Esri::ArcGISRuntime::FeatureLayer* m_buildingLayer; // 建筑要素层
+    Esri::ArcGISRuntime::RasterLayer* mapLayer;
+    // Esri::ArcGISRuntime::RasterLayer* m_basemapLayer;
+    // Esri::ArcGISRuntime::Camera m_camera;
 public:
     explicit DEM(QWidget* parent = nullptr);
-    ~DEM() override;
+    ~DEM(){} ;
+
 private:
+    //加载高程数据
+    void _Load_Elevation();
+    // void applyRenderer(Esri::ArcGISRuntime::RasterLayer *layer, Esri::ArcGISRuntime::Raster *raster);
+    //使用下载的gpkg文件作为建筑图层
+    void _Load_GeoPackage();
+    void _Load_Basemap();
+    void Load_Resource();
 
-    void loadDataAndPrintExtent();
-    void useGeoPackageBuild();
+    void Set_Camera_Extent(const Esri::ArcGISRuntime::Envelope& ext);
 
-    void Load_Elevation();
-    void Load_Basemap();
-
-    void Config_Renderer(Esri::ArcGISRuntime::RasterLayer* layer, Esri::ArcGISRuntime::Raster* raster);
-
-
-    void Set_Camera(const Esri::ArcGISRuntime::Envelope &ext);
+private:
+    void Handle_MapLayer();
+    void Handle_Building(Esri::ArcGISRuntime::GeoPackage* gpkg);
 };
 
 #endif // DEM_H
