@@ -86,9 +86,17 @@ DEM::DEM(QWidget* parent /*=nullptr*/)
     setCentralWidget(m_sceneView);
 }
 
+// #define SHANGHAI
+#ifndef SHANGHAI
 QString FILE_PATH_BASE_MAP = "../../Resource/Basemap/cliped.tif";
 QString FILE_PATH_ELEVATION = "../../Resource/Elevation/output_hh.tif";
 QString FILE_PATH_GEO_PACKAGE = "../../Resource/Building/test1.gpkg";
+#else
+QString FILE_PATH_BASE_MAP = "../../Resource/Basemap/Shanghai.tif";
+QString FILE_PATH_ELEVATION = "../../Resource/Elevation/shanghai.tif";
+QString FILE_PATH_GEO_PACKAGE = "../../Resource/Building/building_shanghai.gpkg";
+#endif
+
 void DEM::Load_Resource()
 {
     if (!QFile::exists(FILE_PATH_BASE_MAP) || !QFile::exists(FILE_PATH_ELEVATION))
@@ -116,6 +124,7 @@ void DEM::_Load_Elevation()
     // 【夸张地形】为了测试高程是否生效，建议先设为 3.0 或 5.0
     // 如果是 1.0，平原地区可能看不出来
     surface->setElevationExaggeration(1.0f);
+    // surface->setElevationExaggeration(5.0f);
     // 应用到场景
     m_scene->setBaseSurface(surface);
 }
@@ -302,7 +311,8 @@ void DEM::Handle_Building(Esri::ArcGISRuntime::GeoPackage *gpkg)
     RendererSceneProperties sceneProps = typeRenderer->sceneProperties();
     sceneProps.setExtrusionMode(ExtrusionMode::BaseHeight);
     //这里calc_height是我自己在QGIS中设置的一个属性
-    sceneProps.setExtrusionExpression("[calc_height]");
+    // sceneProps.setExtrusionExpression("[calc_height]");
+    sceneProps.setExtrusionExpression("[height]");
 
     typeRenderer->setSceneProperties(sceneProps);
     m_buildingLayer->setRenderer(typeRenderer);
